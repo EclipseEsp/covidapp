@@ -37,3 +37,9 @@
     transform: translateY(0px);
   }
 }
+
+path {
+  fill: #aaa;
+  stroke: #ddd;
+  stroke-width: 0.5;
+}
