@@ -27,7 +27,7 @@ const MapChart = ({ setTooltipContent, parentCallback}) => {
   
   return (
     <>
-      <ComposableMap data-tip="" projectionConfig={{ scale: 200 }}>
+      <ComposableMap height={230} data-tip="" projectionConfig={{ scale: 200 }}>
         <ZoomableGroup>
           <Geographies geography={geoUrl}>
             {({ geographies }) =>
@@ -35,10 +35,10 @@ const MapChart = ({ setTooltipContent, parentCallback}) => {
                 <Geography
                   key={geo.rsmKey}
                   geography={geo}
-                //   onMouseEnter={() => {
-                //     const { NAME, POP_EST } = geo.properties;
-                //     setTooltipContent(`${NAME} — ${rounded(POP_EST)}`);
-                //   }}
+                  onMouseEnter={() => {
+                    const { NAME, POP_EST } = geo.properties;
+                    setTooltipContent(`${NAME} — ${rounded(POP_EST)}`);
+                  }}
                   onMouseLeave={() => {
                     setTooltipContent("");
                   }}
@@ -50,8 +50,9 @@ const MapChart = ({ setTooltipContent, parentCallback}) => {
                   }}
                   style={{
                     default: {
-                      fill: "#D6D6DA",
-                      outline: "none"
+                      fill: "black", //#D6D6DA
+                      // outline: "none",
+                      // borderColor: "black",
                     },
                     hover: {
                       fill: "#F53",

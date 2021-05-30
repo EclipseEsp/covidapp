@@ -12,8 +12,7 @@ import Moment from 'moment';
 import ReactTooltip from "react-tooltip"
 import MapChart from "./MapChart";
 import CanvasJSReact from './canvasjs.stock.react';
-
-
+import { ReactSearchAutocomplete } from 'react-search-autocomplete';
 
 // import WorldMap from "./WorldMap"
 // import ReactGlobe from 'react-globe';
@@ -30,7 +29,10 @@ function App() {
   const [pathString,setPathString] = useState("")
   const [covidData,setCovidData] = useState([])
   const [selectCountry,setSelectedCountry] = useState("No Country Selected.")
+  const [allCountries,setAllCountries] = useState([])
+  const [favourites,setFavourites] = useState(JSON.parse(localStorage.getItem("favourites"))||[])
   const [filterResult, setFilterResults] = useState([])
+  const [searchinput, setSearchInput] = useState("")
 
   // Graphs Data
   const [date,setDate] = useState({})
@@ -75,6 +77,8 @@ function App() {
     },
     animationEnabled: true,
     exportEnabled: true,
+    //theme: "dark1",
+    colorSet: "colorSet4",
     charts: [{
       axisX: {
         crosshair: {
@@ -90,6 +94,7 @@ function App() {
       },
       data: [{
         type: "spline",
+        //lineColor: "red",
         dataPoints: dataPoints //generateDataPoints(10000)
       }]
     }]
@@ -100,7 +105,104 @@ function App() {
     setSelectedCountry(country)
   }
 
-  // Fetch Covid Data
+
+
+  // Favourite Component --------------------------------------------------------------------------------------------------
+  const FavouriteTab = () => {
+    return (<div style={{display: 'flex', flexDirection: 'column', margin:0, top: 100, left:0, position: 'fixed', backgroundColor: 'white'}}>
+      <button>Favourites</button>
+      { favourites.map(country=>{
+        return (<div style={{display: 'flex', flexDirection: 'row'}}>
+            <h5 onClick={()=>{setSelectedCountry(country)}}style={{margin: 'auto', alignItems: 'center', padding: 10, borderColor:'black'}}>{country}</h5>
+            <button onClick={()=>{
+              setFavourites(favourites.filter(item=>item!== country));
+              alert("Removed from Favourites");}}>remove</button>
+          </div>)
+      })}
+    </div>
+  )}
+
+  const handleFavourite = (country) =>{
+    if( !favourites.includes(country)){
+      setFavourites([...favourites,country])
+      alert("Added to Favourites")
+    }else{
+      setFavourites(favourites.filter(item=>item!== country))
+      alert("Removed from Favourites")
+    }
+  }
+
+  useEffect(()=>{
+    if (favourites  != null){
+      localStorage.setItem('favourites',JSON.stringify(favourites))
+    }
+  },[favourites])
+
+  // Searchbar Component --------------------------------------------------------------------------------------------------
+  const SearchBar = () => {
+    // const items = [
+    //   {
+    //     id: 0,
+    //     name: 'Cobol'
+    //   },
+    //   {
+    //     id: 1,
+    //     name: 'JavaScript'
+    //   },
+    //   {
+    //     id: 2,
+    //     name: 'Basic'
+    //   },
+    //   {
+    //     id: 3,
+    //     name: 'PHP'
+    //   },
+    //   {
+    //     id: 4,
+    //     name: 'Java'
+    //   }
+    // ]
+
+    const handleOnSearch = (string, results) => {
+      // onSearch will have as the first callback parameter
+      // the string searched and for the second the results.
+      console.log(string, results)
+    }
+  
+    const handleOnHover = (result) => {
+      // the item hovered
+      console.log(result)
+    }
+  
+    const handleOnSelect = (item) => {
+      // the item selected
+      setSelectedCountry(item.name)
+      console.log(item)
+    }
+  
+    const handleOnFocus = () => {
+      console.log('Focused')
+    }
+    return (<div style={{width:400, top: 100, position: 'fixed'}}>
+        <ReactSearchAutocomplete
+          items={allCountries}
+          onSearch={handleOnSearch}
+          onHover={handleOnHover}
+          onSelect={handleOnSelect}
+          onFocus={handleOnFocus}
+          autoFocus
+        />
+      {/* <form 
+        onSubmit={()=>{
+        alert("submitted")}}>
+        <input></input>
+        <button>Search Bar</button>
+      </form> */}
+    </div>
+  )}
+
+
+  // Fetch Covid Data ------------------------------------------------------------------------------------------------------
   //https://raw.githubusercontent.com/d3/d3.github.com/master/world-110m.v1.json
   useEffect(()=>{
     d3.json('https://raw.githubusercontent.com/d3/d3.github.com/master/world-110m.v1.json')
@@ -117,18 +219,39 @@ function App() {
 
     d3.csv('https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/owid-covid-data.csv').then(
       (response)=>{
-        console.log(response)
+        // console.log(response)
         setCovidData(response)
-        var filtercountry = response.filter((d,i)=>{
-          if (d["location"] == 'Singapore')
-          {
-            return d["total_cases"] <= 100;
-          }
+        const col = response.map(d=> d.location)
+        // console.log("Set:",[...new Set(co)])
+        const distinct_col = Array.from([...new Set(col)])
+        var block = distinct_col.map((row,index)=>{
+          return { id: index, name: row}
         })
-        console.log(filtercountry.map((d)=>{
-          console.log(Moment(d.date).format('DD-MM'))
-          console.log(d.total_cases)
-        }))
+        setAllCountries(block)
+
+        // setAllCountries([...new Set(co)])
+        // console.log("test",co.filter((d,i)=>(co.indexOf(d) === i)))
+          // if ( !allCountries.includes(d["location"]))
+          // {
+          //   console.log(allCountries)
+           //setAllCountries([...allCountries,d["location"]])
+          
+      // })
+        // })
+        // console.log(filtercountry.map((d)=>{
+        //   console.log(Moment(d.date).format('DD-MM'))
+        //   console.log(d.total_cases)
+        // }))
+        // var filtercountry = response.filter((d,i)=>{
+        //   if (d["location"] == 'Singapore')
+        //   {
+        //     return d["total_cases"] <= 100;
+        //   }
+        // })
+        // console.log(filtercountry.map((d)=>{
+        //   console.log(Moment(d.date).format('DD-MM'))
+        //   console.log(d.total_cases)
+        // }))
         // setSelectedCountry(filtercountry)
         
       }
@@ -138,7 +261,7 @@ function App() {
   // Fetch Covid Data of Selected Country
   useEffect(()=>{
     if(selectCountry != "No Country Selected."){
-        console.log("TEST")
+        console.log("Fetching Covid Data")
         var results = covidData.filter((row)=>{
           if(row.location == selectCountry)
           return row;
@@ -229,6 +352,8 @@ function App() {
   return (
     <div className="App">
       {/* <h1>Test</h1> */}
+      <FavouriteTab/>
+      <SearchBar/>
       <MapChart setTooltipContent={setContent} parentCallback={handleClick} />
       <ReactTooltip>{content}</ReactTooltip>
       <button onClick={()=>{setDataPoints(total_cases)}}>total covid cases</button>
@@ -237,6 +362,7 @@ function App() {
       <button onClick={()=>{setDataPoints(total_tests)}}>total tests</button>
       <button onClick={()=>{setDataPoints(total_deaths)}}>total deaths</button>
       <button onClick={()=>{setDataPoints(new_deaths)}}>new deaths</button>
+      <button onClick={()=>{handleFavourite(selectCountry)}}>add/remove favourites</button>
       {!initialized ? (
         <h1> Loading...</h1>
       ) : (
