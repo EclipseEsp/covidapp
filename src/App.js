@@ -19,8 +19,9 @@ import { ReactSearchAutocomplete } from 'react-search-autocomplete';
 // import * as THREE from 'three';
 
 // var CanvasJSChart = CanvasJSReact.CanvasJSChart;
-var CanvasJS = CanvasJSReact.CanvasJS;
+var CanvasJSChart = CanvasJSReact.CanvasJSChart;
 var CanvasJSStockChart = CanvasJSReact.CanvasJSStockChart;
+
 
 var currentDate = Moment(new Date())
 
@@ -32,11 +33,13 @@ function App() {
   const [allCountries,setAllCountries] = useState([])
   const [favourites,setFavourites] = useState(JSON.parse(localStorage.getItem("favourites"))||[])
   const [filterResult, setFilterResults] = useState([])
-  const [searchinput, setSearchInput] = useState("")
+  const [searchInput, setSearchInput] = useState("")
+  const [populationEstimate, setPopulationEstimate] = useState(0)
+  const [toggleFav,setToggleFav] = useState(true)
 
   // Graphs Data
   const [date,setDate] = useState({})
-  const [total_cases,setTotal_Cases] = useState([])
+  const [total_cases,setTotal_Cases] = useState([0])
   const [new_cases,setNew_Cases] = useState([])
   const [total_vac,setTotal_Vac] = useState([])
   const [total_tests,setTotal_Tests] = useState([])
@@ -100,25 +103,71 @@ function App() {
     }]
   };
 
-  const handleClick = (country) =>{
+  const options2 = {
+    animationEnabled: true,
+    title: {
+      text: "% of Country Affected"
+    },
+    subtitles: [{
+      text: parseFloat( (total_cases[total_cases.length-1])["y"]/populationEstimate*100 ).toFixed(2) + "%",
+      verticalAlign: "center",
+      fontSize: 24,
+      dockInsidePlotArea: true
+    }],
+    data: [{
+      type: "doughnut",
+      showInLegend: true,
+      indexLabel: "{name}: {y}",
+      //yValueFormatString: "#,###'%'",
+      dataPoints: [
+        { name: "total cases", y: (total_cases[total_cases.length-1])["y"]  },
+        { name: "unaffected", y: populationEstimate - (total_cases[total_cases.length-1])["y"]  },
+        // { name: "Very Satisfied", y: 40 },
+        // { name: "Satisfied", y: 17 },
+        // { name: "Neutral", y: 7 }
+      ]
+    }]
+  }
+
+
+  const handleClick = (country,population) =>{
     console.log("Parent Callback:",country)
-    setSelectedCountry(country)
+    allCountries.map((d)=>{{
+      if(d.name == country){
+        setSelectedCountry(country)
+      }
+    }})
+      //setSelectedCountry(country)
+    setPopulationEstimate(population)
   }
 
 
 
   // Favourite Component --------------------------------------------------------------------------------------------------
   const FavouriteTab = () => {
-    return (<div style={{display: 'flex', flexDirection: 'column', margin:0, top: 100, left:0, position: 'fixed', backgroundColor: 'white'}}>
-      <button>Favourites</button>
-      { favourites.map(country=>{
-        return (<div style={{display: 'flex', flexDirection: 'row'}}>
-            <h5 onClick={()=>{setSelectedCountry(country)}}style={{margin: 'auto', alignItems: 'center', padding: 10, borderColor:'black'}}>{country}</h5>
-            <button onClick={()=>{
-              setFavourites(favourites.filter(item=>item!== country));
-              alert("Removed from Favourites");}}>remove</button>
-          </div>)
-      })}
+    return (
+    <div style={
+      { display: 'flex',
+        flexDirection: 'column', 
+        margin:0, top: 100, left:10, 
+        zIndex:1, 
+        position: 'fixed', 
+        backgroundColor: 'white', 
+        border: '2px solid black',
+        borderRadius: '3px'}}>
+          
+    <button onClick={()=>{setToggleFav(!toggleFav)}} style={{width:'210px',margin: '5' , backgroundColor: 'transparent'}}>Favourites ({favourites.length})</button>
+        { 
+          favourites.map(country=>{
+            if (toggleFav == true) return (
+            <div style={{display: 'flex', flexDirection: 'row'}}>
+                <h6 onClick={()=>{setSelectedCountry(country)}}style={{margin: 'auto', alignItems: 'center', padding: 10, borderColor:'black'}}>{country}</h6>
+                <button style={{margin: '5px'}} onClick={()=>{
+                  setFavourites(favourites.filter(item=>item!== country));
+                  alert("Removed from Favourites");}
+                  }>remove</button>
+            </div>)})
+        }
     </div>
   )}
 
@@ -227,6 +276,7 @@ function App() {
         var block = distinct_col.map((row,index)=>{
           return { id: index, name: row}
         })
+        //console.log("block",block)
         setAllCountries(block)
 
         // setAllCountries([...new Set(co)])
@@ -307,6 +357,7 @@ function App() {
         // setFilterResults(results)
         // console.log("temp_total",temp_total)
         // setTotal_Cases(temp_total)
+        console.log("temp1",temp1)
         setTotal_Cases(temp1);
         setNew_Cases(temp2);
         setTotal_Vac(temp3);
@@ -345,8 +396,18 @@ function App() {
   const containerProps = {
     // height: "calc(100vh - 150px)"
     width: "100%",
-    height: "450px",
+    height: "250px", // 450px
     margin: "auto"
+  };
+
+  const containerProps2 = {
+    // height: "calc(100vh - 150px)"
+    width: "50%",
+    height: "250px", // 450px
+    // position: "fixed",
+    borderColor: "black",
+    // top: 100,
+    // right: 0,
   };
 
   return (
@@ -356,18 +417,22 @@ function App() {
       <SearchBar/>
       <MapChart setTooltipContent={setContent} parentCallback={handleClick} />
       <ReactTooltip>{content}</ReactTooltip>
-      <button onClick={()=>{setDataPoints(total_cases)}}>total covid cases</button>
-      <button onClick={()=>{setDataPoints(new_cases)}}>new cases</button>
-      <button onClick={()=>{setDataPoints(total_vac)}}>total vaccinations</button>
-      <button onClick={()=>{setDataPoints(total_tests)}}>total tests</button>
-      <button onClick={()=>{setDataPoints(total_deaths)}}>total deaths</button>
-      <button onClick={()=>{setDataPoints(new_deaths)}}>new deaths</button>
-      <button onClick={()=>{handleFavourite(selectCountry)}}>add/remove favourites</button>
-      {!initialized ? (
-        <h1> Loading...</h1>
-      ) : (
-        <CanvasJSStockChart containerProps={containerProps} options={options} />
-      )}
+
+      <div>
+        <button onClick={()=>{setDataPoints(total_cases)}}>total covid cases</button>
+        <button onClick={()=>{setDataPoints(new_cases)}}>new cases</button>
+        <button onClick={()=>{setDataPoints(total_vac)}}>total vaccinations</button>
+        <button onClick={()=>{setDataPoints(total_tests)}}>total tests</button>
+        <button onClick={()=>{setDataPoints(total_deaths)}}>total deaths</button>
+        <button onClick={()=>{setDataPoints(new_deaths)}}>new deaths</button>
+        <button onClick={()=>{handleFavourite(selectCountry)}}>add/remove favourites</button>
+        {!initialized ? (
+          <h1> Loading...</h1>
+        ) : (
+          <CanvasJSStockChart containerProps={containerProps} options={options} />
+        )}
+      </div>
+        <CanvasJSChart containerProps={containerProps2} options = {options2}/>
     </div>
   );
 }
