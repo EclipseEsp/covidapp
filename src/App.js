@@ -14,6 +14,11 @@ import MapChart from "./MapChart";
 import CanvasJSReact from './canvasjs.stock.react';
 import { ReactSearchAutocomplete } from 'react-search-autocomplete';
 import { FcLike, FcLikePlaceholder } from "react-icons/fc";
+
+//Redux
+import { useSelector, useDispatch } from 'react-redux';
+import { LOADNG_STATE } from './actions/covidActions';
+import { fetchCovidData, store } from './app/store';
 // import WorldMap from "./WorldMap"
 // import ReactGlobe from 'react-globe';
 // import * as THREE from 'three';
@@ -24,11 +29,12 @@ var CanvasJSStockChart = CanvasJSReact.CanvasJSStockChart;
 
 
 var currentDate = Moment(new Date())
-var yesterday = currentDate.subtract(1,"days").format("YYYY-MM-DD")
+var yesterday = currentDate.subtract(2,"days").format("YYYY-MM-DD")
 
 function App() {
   const [geoJson,setGeoJson] = useState({})
   const [pathString,setPathString] = useState("")
+  const covid = useSelector((state)=>state.covid)
   const [covidData,setCovidData] = useState([])
   const [selectCountry,setSelectedCountry] = useState("No Country Selected.")
   const [allCountries,setAllCountries] = useState([])
@@ -283,7 +289,8 @@ function App() {
         }
     </div>
   )}
-
+  
+  // News Tab Component ----------------------------------------------------------------------------------------------------
   const NewsTab = () => {
     return (
       <div style={
@@ -301,73 +308,38 @@ function App() {
   }
 
 
+
   // Fetch Covid Data ------------------------------------------------------------------------------------------------------
   //https://raw.githubusercontent.com/d3/d3.github.com/master/world-110m.v1.json
   useEffect(()=>{
-    d3.json('https://raw.githubusercontent.com/d3/d3.github.com/master/world-110m.v1.json')
-    .then(json=>{
-      setGeoJson(topojson.feature(json,json.objects.countries))
-      //test
-      // console.log("land",topojson.feature(json, json.objects.land))
-      // console.log("countries",topojson.feature(json, json.objects.countries).features)
-      // console.log("borders",topojson.mesh(json,json.objects.countries, function(a, b) { return a !== b; }))
-
-    })
-    // .then(json=>console.log(json))
-    .catch(error=>console.log(error))
-
     d3.csv('https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/owid-covid-data.csv').then(
       (response)=>{
         // console.log(response)
         setCovidData(response)
         const col = response.map(d=> d.location)
-        // console.log("Set:",[...new Set(co)])
+        //   console.log("Set:",[...new Set(co)])
         const distinct_col = Array.from([...new Set(col)])
         var block = distinct_col.map((row,index)=>{
           return { id: index, name: row}
         })
         //console.log("block",block)
         setAllCountries(block)
-        console.log(currentDate.subtract(1,'days').format("YYYY-MM-DD"))
+
+
+        // Processing Leaderboard data ------------------------------------------------------------------------------------
+        //  console.log(currentDate.subtract(1,'days').format("YYYY-MM-DD"))
         const delta = response.filter(d=>{
-          if ( Moment(d.date).isSame(yesterday) && (d.continent != "") ){ //"2021-05-31"
-          return d
+        if ( Moment(d.date).isSame(yesterday) && (d.continent != "") ){ //"2021-05-31"
+        return d
           }
         })
-
-        //delta = delta.sort((a,b) =>  parseFloat(a.total_cases) > parseFloat(b.total_cases) ? 1: -1)
+       // console.log("leaderboard",delta.sort((a,b) =>  parseFloat(a.total_cases) > parseFloat(b.total_cases) ? -1: 1))
+        // //delta = delta.sort((a,b) =>  parseFloat(a.total_cases) > parseFloat(b.total_cases) ? 1: -1)
         setLeaderboard(delta.sort((a,b) =>  parseFloat(a.total_cases) > parseFloat(b.total_cases) ? -1: 1))
-
-        // setAllCountries([...new Set(co)])
-        // console.log("test",co.filter((d,i)=>(co.indexOf(d) === i)))
-          // if ( !allCountries.includes(d["location"]))
-          // {
-          //   console.log(allCountries)
-           //setAllCountries([...allCountries,d["location"]])
-          
-      // })
-        // })
-        // console.log(filtercountry.map((d)=>{
-        //   console.log(Moment(d.date).format('DD-MM'))
-        //   console.log(d.total_cases)
-        // }))
-        // var filtercountry = response.filter((d,i)=>{
-        //   if (d["location"] == 'Singapore')
-        //   {
-        //     return d["total_cases"] <= 100;
-        //   }
-        // })
-        // console.log(filtercountry.map((d)=>{
-        //   console.log(Moment(d.date).format('DD-MM'))
-        //   console.log(d.total_cases)
-        // }))
-        // setSelectedCountry(filtercountry)
-        
-      }
-    ).catch(error=>console.log(error))
+      })
   },[])
 
-  // Fetch Covid Data of Selected Country
+  // Fetch Covid Data of Selected Country ------------------------------------------------------------------------------------
   useEffect(()=>{
     if(selectCountry != "No Country Selected."){
         console.log("Fetching Covid Data")
@@ -501,11 +473,6 @@ function App() {
         )}
       </div>
       
-      {/* <div>
-        <object type="text/html" data="https://www.google.com/" style={{width:'100%', height:'100%'}}>
-        </object>
-      </div> */}
-
     </div>
   );
 }

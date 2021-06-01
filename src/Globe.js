@@ -15,13 +15,13 @@ class Globe extends Component {
     render() {
       let projection = d3.geoOrthographic()
         .fitSize([this.props.size, this.props.size], this.props.geoJson)
-        .rotate([60])
+        .rotate([0])
       
       let geoGenerator = d3.geoPath()
         .projection(projection)
       
       let pathString = geoGenerator(this.props.geoJson)
-      
+      console.log("geoJson",this.props.geoJson)
     //   console.log("pathString",pathString)
     //   window.requestAnimationFrame(() => {
     //     this.setState({
@@ -31,7 +31,7 @@ class Globe extends Component {
       
       
       return <svg width={this.props.size} height={this.props.size} >
-        <path d={pathString} onClick={()=>console.log("test")} />
+        <path id="globeline" d={pathString} onClick={()=>console.log("test")} />
       </svg>
     }
   }

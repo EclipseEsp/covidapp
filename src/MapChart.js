@@ -1,6 +1,5 @@
 import React, { useState,memo } from "react";
 import { useSelector, useDispatch } from 'react-redux';
-import { covidinfo } from './actions/mapActions';
 
 
 import {
@@ -27,7 +26,7 @@ const MapChart = ({ setTooltipContent, parentCallback}) => {
   
   return (
     <>
-      <ComposableMap height={330} data-tip="" projectionConfig={{ scale: 200 }}>
+      <ComposableMap height={300} data-tip="" projectionConfig={{ scale: 200 }}>
         <ZoomableGroup>
           <Geographies geography={geoUrl}>
             {({ geographies }) =>
