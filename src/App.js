@@ -13,7 +13,7 @@ import ReactTooltip from "react-tooltip"
 import MapChart from "./MapChart";
 import CanvasJSReact from './canvasjs.stock.react';
 import { ReactSearchAutocomplete } from 'react-search-autocomplete';
-
+import { FcLike, FcLikePlaceholder } from "react-icons/fc";
 // import WorldMap from "./WorldMap"
 // import ReactGlobe from 'react-globe';
 // import * as THREE from 'three';
@@ -24,6 +24,7 @@ var CanvasJSStockChart = CanvasJSReact.CanvasJSStockChart;
 
 
 var currentDate = Moment(new Date())
+var yesterday = currentDate.subtract(1,"days").format("YYYY-MM-DD")
 
 function App() {
   const [geoJson,setGeoJson] = useState({})
@@ -36,6 +37,7 @@ function App() {
   const [searchInput, setSearchInput] = useState("")
   const [populationEstimate, setPopulationEstimate] = useState(0)
   const [toggleFav,setToggleFav] = useState(true)
+  const [toggleLead,setToggleLead] = useState(true)
 
   // Graphs Data
   const [date,setDate] = useState({})
@@ -45,6 +47,7 @@ function App() {
   const [total_tests,setTotal_Tests] = useState([])
   const [total_deaths,setTotal_Deaths] = useState([])
   const [new_deaths,setNew_Deaths] = useState([])
+  const [leaderboard,setLeaderboard] = useState([])
 
   const [datamax,setDataMax] = useState(0)
   const [datamin,setDataMin] = useState(0)
@@ -106,7 +109,7 @@ function App() {
   const options2 = {
     animationEnabled: true,
     title: {
-      text: "% of Country Affected"
+      text: selectCountry=="No Country Selected."? "No Country Selected.":"% of " + selectCountry + " Affected"
     },
     subtitles: [{
       text: parseFloat( (total_cases[total_cases.length-1])["y"]/populationEstimate*100 ).toFixed(2) + "%",
@@ -143,13 +146,13 @@ function App() {
 
 
 
-  // Favourite Component --------------------------------------------------------------------------------------------------
+  // Favourite Tab Component --------------------------------------------------------------------------------------------------
   const FavouriteTab = () => {
     return (
     <div style={
       { display: 'flex',
         flexDirection: 'column', 
-        margin:0, top: 100, left:10, 
+        margin:0, top: 400, left:10, 
         zIndex:1, 
         position: 'fixed', 
         backgroundColor: 'white', 
@@ -250,6 +253,53 @@ function App() {
     </div>
   )}
 
+  // Leaderboard Tab Component -------------------------------------------------------------------------------------------
+  const LeaderboardTab = () => {
+    return (
+    <div style={
+      { display: 'flex',
+        flexDirection: 'column', 
+        margin:0, top: 100, left:10, 
+        zIndex:1, 
+        position: 'fixed', 
+        backgroundColor: 'white', 
+        border: '2px solid black',
+        borderRadius: '3px'}}>
+          
+    <button onClick={()=>{setToggleLead(!toggleLead)}} style={{width:'210px',margin: '5' , backgroundColor: 'transparent'}}>Top 15 Most Affected Countries</button>
+        { 
+          leaderboard.slice(0,15).map(country=>{  if (toggleLead == true) return(
+            <div style={{display: 'flex', flexDirection: 'row',justifyContent:'space-between'}}>
+              <h6 onClick={()=>{setSelectedCountry(country.location)}}style={{marginTop: 0, marginBottom:0, marginLeft: 5 , borderColor:'black'}}>{country.location}</h6>
+              <h6 style ={{margin: 0}}>{parseInt(country.total_cases)}</h6>
+            </div>
+            // console.log(country.location) 
+          )})
+            // if (toggleLead == true) return (
+            // <div style={{display: 'flex', flexDirection: 'row'}}>
+            //     <h6 onClick={()=>{setSelectedCountry(country.location)}}style={{margin: 'auto', alignItems: 'center', padding: 10, borderColor:'black'}}>{country.location}</h6>
+            // </div>
+            // )})
+        }
+    </div>
+  )}
+
+  const NewsTab = () => {
+    return (
+      <div style={
+        { display: 'flex',
+          flexDirection: 'column', 
+          margin:0, top: 50, left:10, 
+          zIndex:1, 
+          position: 'fixed', 
+          backgroundColor: 'white', 
+          border: '2px solid black',
+          borderRadius: '3px'}}>
+            <button onClick={()=>{window.open("//" + "google.com/search?q=" + "covid " + selectCountry, '_blank');}}> See {selectCountry=="No Country Selected."? "": selectCountry} News </button>
+      </div>
+    )
+  }
+
 
   // Fetch Covid Data ------------------------------------------------------------------------------------------------------
   //https://raw.githubusercontent.com/d3/d3.github.com/master/world-110m.v1.json
@@ -278,6 +328,15 @@ function App() {
         })
         //console.log("block",block)
         setAllCountries(block)
+        console.log(currentDate.subtract(1,'days').format("YYYY-MM-DD"))
+        const delta = response.filter(d=>{
+          if ( Moment(d.date).isSame(yesterday) && (d.continent != "") ){ //"2021-05-31"
+          return d
+          }
+        })
+
+        //delta = delta.sort((a,b) =>  parseFloat(a.total_cases) > parseFloat(b.total_cases) ? 1: -1)
+        setLeaderboard(delta.sort((a,b) =>  parseFloat(a.total_cases) > parseFloat(b.total_cases) ? -1: 1))
 
         // setAllCountries([...new Set(co)])
         // console.log("test",co.filter((d,i)=>(co.indexOf(d) === i)))
@@ -357,7 +416,7 @@ function App() {
         // setFilterResults(results)
         // console.log("temp_total",temp_total)
         // setTotal_Cases(temp_total)
-        console.log("temp1",temp1)
+        //console.log("temp1",temp1)
         setTotal_Cases(temp1);
         setNew_Cases(temp2);
         setTotal_Vac(temp3);
@@ -369,7 +428,7 @@ function App() {
         // setDataMax(temp_max)
         setInitialized(false);
       }
-      console.log("results:",total_cases)
+      //console.log("results:",total_cases)
   },[selectCountry])
 
   // This effect simulates dynamic data updates via fetch
@@ -395,7 +454,7 @@ function App() {
 
   const containerProps = {
     // height: "calc(100vh - 150px)"
-    width: "100%",
+    width: "90%",
     height: "250px", // 450px
     margin: "auto"
   };
@@ -413,26 +472,40 @@ function App() {
   return (
     <div className="App">
       {/* <h1>Test</h1> */}
-      <FavouriteTab/>
+      <div id="triggerview" ></div>
+      <NewsTab id="newstab"/>
+      <FavouriteTab id="favouritetab"/>
+      <LeaderboardTab id="leaderboardtab"/>
       <SearchBar/>
       <MapChart setTooltipContent={setContent} parentCallback={handleClick} />
       <ReactTooltip>{content}</ReactTooltip>
 
+      <CanvasJSChart containerProps={containerProps2} options = {options2}/>
       <div>
+        {
+          (!favourites.includes(selectCountry) ? 
+          <FcLikePlaceholder style={{paddingRight: 10}} onClick={()=>{handleFavourite(selectCountry); setToggleFav(true)}}>add/remove favourites</FcLikePlaceholder>:
+          <FcLike style={{paddingRight: 10}} onClick={()=>{handleFavourite(selectCountry); setToggleFav(true)}}>add/remove favourites</FcLike>)
+        }
         <button onClick={()=>{setDataPoints(total_cases)}}>total covid cases</button>
         <button onClick={()=>{setDataPoints(new_cases)}}>new cases</button>
         <button onClick={()=>{setDataPoints(total_vac)}}>total vaccinations</button>
         <button onClick={()=>{setDataPoints(total_tests)}}>total tests</button>
         <button onClick={()=>{setDataPoints(total_deaths)}}>total deaths</button>
         <button onClick={()=>{setDataPoints(new_deaths)}}>new deaths</button>
-        <button onClick={()=>{handleFavourite(selectCountry)}}>add/remove favourites</button>
+        {/* <FcLike onClick={()=>{handleFavourite(selectCountry); setToggleFav(true)}}>add/remove favourites</FcLike> */}
         {!initialized ? (
           <h1> Loading...</h1>
         ) : (
           <CanvasJSStockChart containerProps={containerProps} options={options} />
         )}
       </div>
-        <CanvasJSChart containerProps={containerProps2} options = {options2}/>
+      
+      {/* <div>
+        <object type="text/html" data="https://www.google.com/" style={{width:'100%', height:'100%'}}>
+        </object>
+      </div> */}
+
     </div>
   );
 }

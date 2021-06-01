@@ -27,7 +27,7 @@ const MapChart = ({ setTooltipContent, parentCallback}) => {
   
   return (
     <>
-      <ComposableMap height={230} data-tip="" projectionConfig={{ scale: 200 }}>
+      <ComposableMap height={330} data-tip="" projectionConfig={{ scale: 200 }}>
         <ZoomableGroup>
           <Geographies geography={geoUrl}>
             {({ geographies }) =>

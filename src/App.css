@@ -72,3 +72,23 @@ svg {
   display: inline-block;
   vertical-align: middle;
 }
+
+/* #triggerview{
+  width:200;
+  height:400; 
+  position:'fixed'; 
+  top:0;
+  left:0;
+  z-index:1;
+  visibility: visible;
+}
+
+#triggerview:hover{
+  width:200;
+  height:400; 
+  position:'fixed'; 
+  top:0;
+  left:0;
+  z-index:1;
+  visibility: visible;
+} */
