@@ -44,7 +44,7 @@ const MapChart = ({ setTooltipContent, parentCallback}) => {
                   onClick={() => {
                     const { NAME, POP_EST } = geo.properties;
                     setTooltipContent(`${NAME} — ${rounded(POP_EST)}`);
-                    parentCallback(NAME,POP_EST)
+                    parentCallback(NAME)
                     // console.log(NAME) 
                   }}
                   style={{

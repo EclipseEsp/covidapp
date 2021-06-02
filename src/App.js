@@ -41,7 +41,7 @@ function App() {
   const [favourites,setFavourites] = useState(JSON.parse(localStorage.getItem("favourites"))||[])
   const [filterResult, setFilterResults] = useState([])
   const [searchInput, setSearchInput] = useState("")
-  const [populationEstimate, setPopulationEstimate] = useState(0)
+  const [populationEstimate, setPopulationEstimate] = useState([0])
   const [toggleFav,setToggleFav] = useState(true)
   const [toggleLead,setToggleLead] = useState(true)
 
@@ -118,7 +118,7 @@ function App() {
       text: selectCountry=="No Country Selected."? "No Country Selected.":"% of " + selectCountry + " Affected"
     },
     subtitles: [{
-      text: parseFloat( (total_cases[total_cases.length-1])["y"]/populationEstimate*100 ).toFixed(2) + "%",
+      text: parseFloat( (total_cases[total_cases.length-1])["y"]/ (populationEstimate[populationEstimate.length-1])["y"]*100 ).toFixed(2) + "%",
       verticalAlign: "center",
       fontSize: 24,
       dockInsidePlotArea: true
@@ -130,7 +130,7 @@ function App() {
       //yValueFormatString: "#,###'%'",
       dataPoints: [
         { name: "total cases", y: (total_cases[total_cases.length-1])["y"]  },
-        { name: "unaffected", y: populationEstimate - (total_cases[total_cases.length-1])["y"]  },
+        { name: "unaffected", y: (populationEstimate[populationEstimate.length-1])["y"] - (total_cases[total_cases.length-1])["y"]  },
         // { name: "Very Satisfied", y: 40 },
         // { name: "Satisfied", y: 17 },
         // { name: "Neutral", y: 7 }
@@ -147,7 +147,7 @@ function App() {
       }
     }})
       //setSelectedCountry(country)
-    setPopulationEstimate(population)
+    //setPopulationEstimate(population)
   }
 
 
@@ -402,6 +402,7 @@ function App() {
         var temp4 = []
         var temp5 = [] 
         var temp6 = []
+        var temp7 = []
         var temp_max = 0
         var temp_min = 0
         results.forEach((row,index)=>{
@@ -411,12 +412,14 @@ function App() {
           var block4 = { x: new Date(row.date), y: parseInt(row.total_tests) }
           var block5 = { x: new Date(row.date), y: parseInt(row.total_deaths) }
           var block6 = { x: new Date(row.date), y: parseInt(row.new_deaths) }
+          var block7 = { x: new Date(row.date), y: parseInt(row.population) }
           temp1 = [...temp1, block1]
           temp2 = [...temp2, block2]
           temp3 = [...temp3, block3]
           temp4 = [...temp4, block4]
           temp5 = [...temp5, block5]
           temp6 = [...temp6, block6]
+          temp7 = [...temp7, block7]
           // console.log(row.total_cases)
           // setTotal_Cases([...total_cases,row.total_cases])
 
@@ -435,6 +438,7 @@ function App() {
         setTotal_Tests(temp4);
         setTotal_Deaths(temp5);
         setNew_Deaths(temp6);
+        setPopulationEstimate(temp7);
 
         setDataPoints(temp1)
         // setDataMax(temp_max)
