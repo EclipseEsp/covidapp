@@ -337,7 +337,7 @@ function App() {
         // //delta = delta.sort((a,b) =>  parseFloat(a.total_cases) > parseFloat(b.total_cases) ? 1: -1)
         setLeaderboard(delta.sort((a,b) =>  parseFloat(a.total_cases) > parseFloat(b.total_cases) ? -1: 1))
       })
-  },[])
+  },[covid])
 
   // Fetch Covid Data of Selected Country ------------------------------------------------------------------------------------
   useEffect(()=>{

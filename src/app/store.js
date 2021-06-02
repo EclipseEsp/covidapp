@@ -43,6 +43,8 @@ export const fetchCovidData = () => {
         // //delta.sort((a,b) =>  parseFloat(a.total_cases) > parseFloat(b.total_cases) ? -1: 1)
         // console.log("leaderboard",block2)
         dispatch({type: "COVIDDATA", payload: response})
+        // dispatch({type: "ALLCOUNTRIES", payload: response})
+        // dispatch({type: "LEADERBOARD", payload: response})
         // dispatch({type: "ALLCOUNTRIES", payload: block})  
         // dispatch({type: "LEADERBOARD", payload: delta})
     }).catch((e)=>{
