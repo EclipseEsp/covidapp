@@ -48,11 +48,11 @@ function App() {
   // Graphs Data
   const [date,setDate] = useState({})
   const [total_cases,setTotal_Cases] = useState([0])
-  const [new_cases,setNew_Cases] = useState([])
-  const [total_vac,setTotal_Vac] = useState([])
-  const [total_tests,setTotal_Tests] = useState([])
-  const [total_deaths,setTotal_Deaths] = useState([])
-  const [new_deaths,setNew_Deaths] = useState([])
+  const [new_cases,setNew_Cases] = useState([0])
+  const [total_vac,setTotal_Vac] = useState([0])
+  const [total_tests,setTotal_Tests] = useState([0])
+  const [total_deaths,setTotal_Deaths] = useState([0])
+  const [new_deaths,setNew_Deaths] = useState([0])
   const [leaderboard,setLeaderboard] = useState([])
 
   const [datamax,setDataMax] = useState(0)
@@ -158,7 +158,7 @@ function App() {
     <div style={
       { display: 'flex',
         flexDirection: 'column', 
-        margin:0, top: 400, left:10, 
+        margin:0, top: 430, left:10, 
         zIndex:1, 
         position: 'fixed', 
         backgroundColor: 'white', 
@@ -277,7 +277,7 @@ function App() {
           leaderboard.slice(0,15).map(country=>{  if (toggleLead == true) return(
             <div style={{display: 'flex', flexDirection: 'row',justifyContent:'space-between'}}>
               <h6 onClick={()=>{setSelectedCountry(country.location)}}style={{marginTop: 0, marginBottom:0, marginLeft: 5 , borderColor:'black'}}>{country.location}</h6>
-              <h6 style ={{margin: 0}}>{parseInt(country.total_cases)}</h6>
+              <h6 style ={{margin: '0px 5px 0px 0px'}}>{parseInt(country.total_cases)}</h6>
             </div>
             // console.log(country.location) 
           )})
@@ -307,7 +307,47 @@ function App() {
     )
   }
 
+  // Latest Info Tab Component ---------------------------------------------------------------------------------------------
+  const LatestInfoTab = () => {
+    return (
+      <div style={
+        { display: 'flex',
+          flexDirection: 'column', 
+          margin:0, top: 100, right:10, 
+          zIndex:1, 
+          position: 'fixed', 
+          backgroundColor: 'white', 
+          border: '2px solid black',
+          borderRadius: '3px'}}>
+            <button style={{width:'210px',margin: '5' , backgroundColor: 'transparent'}}> {selectCountry=="No Country Selected."? "No Country Selected.":selectCountry + " Latest Info"} </button>
+            <div style={{display: 'flex', flexDirection: 'row',justifyContent:'space-between'}}>
+              <h6 style={{marginTop: 0, marginBottom:0, marginLeft: 5 , borderColor:'black'}}>Total Cases</h6>
+              <h6 style ={{margin: '0px 5px 0px 0px'}}>{parseInt((total_cases[total_cases.length-1])["y"]  )}</h6>
+            </div>
+            <div style={{display: 'flex', flexDirection: 'row',justifyContent:'space-between'}}>
+              <h6 style={{marginTop: 0, marginBottom:0, marginLeft: 5 , borderColor:'black'}}>New Cases</h6>
+              <h6 style ={{margin: '0px 5px 0px 0px'}}>{parseInt((new_cases[new_cases.length-1])["y"]  )}</h6>
+            </div>
+            <div style={{display: 'flex', flexDirection: 'row',justifyContent:'space-between'}}>
+              <h6 style={{marginTop: 0, marginBottom:0, marginLeft: 5 , borderColor:'black'}}>Total Vaccinations</h6>
+              <h6 style ={{margin: '0px 5px 0px 0px'}}>{parseInt((total_vac[total_vac.length-1])["y"]  )}</h6>
+            </div>
+            <div style={{display: 'flex', flexDirection: 'row',justifyContent:'space-between'}}>
+              <h6 style={{marginTop: 0, marginBottom:0, marginLeft: 5 , borderColor:'black'}}>Total Tests</h6>
+              <h6 style ={{margin: '0px 5px 0px 0px'}}>{parseInt((total_tests[total_tests.length-1])["y"]  )}</h6>
+            </div>
+            <div style={{display: 'flex', flexDirection: 'row',justifyContent:'space-between'}}>
+              <h6 style={{marginTop: 0, marginBottom:0, marginLeft: 5 , borderColor:'black'}}>Total Deaths</h6>
+              <h6 style ={{margin: '0px 5px 0px 0px'}}>{parseInt((total_deaths[total_deaths.length-1])["y"]  )}</h6>
+            </div>
+            <div style={{display: 'flex', flexDirection: 'row',justifyContent:'space-between'}}>
+              <h6 style={{marginTop: 0, marginBottom:0, marginLeft: 5 , borderColor:'black'}}>New Deaths</h6>
+              <h6 style ={{margin: '0px 5px 0px 0px'}}>{parseInt((new_deaths[new_deaths.length-1])["y"]  )}</h6>
+            </div>
 
+      </div>
+    )
+  }
 
   // Fetch Covid Data ------------------------------------------------------------------------------------------------------
   //https://raw.githubusercontent.com/d3/d3.github.com/master/world-110m.v1.json
@@ -426,17 +466,25 @@ function App() {
 
   const containerProps = {
     // height: "calc(100vh - 150px)"
-    width: "90%",
+    width: "100%",
     height: "250px", // 450px
-    margin: "auto"
+    marginLeft: 200,
+    marginRight: 200,
   };
 
   const containerProps2 = {
     // height: "calc(100vh - 150px)"
-    width: "50%",
-    height: "250px", // 450px
+    position: "fixed",
+    top: 300,
+    right: 0,
+    marginTop: 20,
+    marginBottom: 20,
+    padding: 10,
+    width: "200px",
+    height: "300px", // 450px
     // position: "fixed",
-    borderColor: "black",
+    // borderColor: "black",
+    // borderWidth: 3,
     // top: 100,
     // right: 0,
   };
@@ -449,29 +497,28 @@ function App() {
       <FavouriteTab id="favouritetab"/>
       <LeaderboardTab id="leaderboardtab"/>
       <SearchBar/>
+      <LatestInfoTab/>
       <MapChart setTooltipContent={setContent} parentCallback={handleClick} />
       <ReactTooltip>{content}</ReactTooltip>
-
       <CanvasJSChart containerProps={containerProps2} options = {options2}/>
-      <div>
-        {
-          (!favourites.includes(selectCountry) ? 
-          <FcLikePlaceholder style={{paddingRight: 10}} onClick={()=>{handleFavourite(selectCountry); setToggleFav(true)}}>add/remove favourites</FcLikePlaceholder>:
-          <FcLike style={{paddingRight: 10}} onClick={()=>{handleFavourite(selectCountry); setToggleFav(true)}}>add/remove favourites</FcLike>)
-        }
-        <button onClick={()=>{setDataPoints(total_cases)}}>total covid cases</button>
-        <button onClick={()=>{setDataPoints(new_cases)}}>new cases</button>
-        <button onClick={()=>{setDataPoints(total_vac)}}>total vaccinations</button>
-        <button onClick={()=>{setDataPoints(total_tests)}}>total tests</button>
-        <button onClick={()=>{setDataPoints(total_deaths)}}>total deaths</button>
-        <button onClick={()=>{setDataPoints(new_deaths)}}>new deaths</button>
-        {/* <FcLike onClick={()=>{handleFavourite(selectCountry); setToggleFav(true)}}>add/remove favourites</FcLike> */}
-        {!initialized ? (
-          <h1> Loading...</h1>
-        ) : (
-          <CanvasJSStockChart containerProps={containerProps} options={options} />
-        )}
-      </div>
+      {
+        (!favourites.includes(selectCountry) ? 
+        <FcLikePlaceholder style={{paddingRight: 10}} onClick={()=>{handleFavourite(selectCountry); setToggleFav(true)}}>add/remove favourites</FcLikePlaceholder>:
+        <FcLike style={{paddingRight: 10}} onClick={()=>{handleFavourite(selectCountry); setToggleFav(true)}}>add/remove favourites</FcLike>)
+      }
+      <button onClick={()=>{setDataPoints(total_cases)}}>total covid cases</button>
+      <button onClick={()=>{setDataPoints(new_cases)}}>new cases</button>
+      <button onClick={()=>{setDataPoints(total_vac)}}>total vaccinations</button>
+      <button onClick={()=>{setDataPoints(total_tests)}}>total tests</button>
+      <button onClick={()=>{setDataPoints(total_deaths)}}>total deaths</button>
+      <button onClick={()=>{setDataPoints(new_deaths)}}>new deaths</button>
+      {/* <FcLike onClick={()=>{handleFavourite(selectCountry); setToggleFav(true)}}>add/remove favourites</FcLike> */}
+      {!initialized ? (
+        <h1> Loading...</h1>
+      ) : (
+        <CanvasJSStockChart containerProps={containerProps} options={options} />
+      )}
+     
       
     </div>
   );
