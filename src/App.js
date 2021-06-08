@@ -368,14 +368,15 @@ function App() {
 
         // Processing Leaderboard data ------------------------------------------------------------------------------------
         //  console.log(currentDate.subtract(1,'days').format("YYYY-MM-DD"))
-        const delta = response.filter(d=>{
-        if ( Moment(d.date).isSame(yesterday) && (d.continent != "") ){ //"2021-05-31"
-        return d
+        var filtered = []
+        const delta = response.map(d=>{
+          if ( Moment(d.date).isSame(yesterday) && d.total_cases != "" && d.continent != ""){ //"2021-05-31"
+            filtered.push(d)
           }
         })
        // console.log("leaderboard",delta.sort((a,b) =>  parseFloat(a.total_cases) > parseFloat(b.total_cases) ? -1: 1))
         // //delta = delta.sort((a,b) =>  parseFloat(a.total_cases) > parseFloat(b.total_cases) ? 1: -1)
-        setLeaderboard(delta.sort((a,b) =>  parseFloat(a.total_cases) > parseFloat(b.total_cases) ? -1: 1))
+        setLeaderboard(filtered.sort((a,b) =>  parseFloat(a.total_cases) > parseFloat(b.total_cases) ? -1: 1))
       })
   },[covid])
 

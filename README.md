@@ -36,7 +36,7 @@ Features includes:
 
 ## Fixes Required
 
-- filtering/sorting of `leaderboard` not working as expected
+-  filtering/sorting of `leaderboard` not working as expected ✅
 - `development` troubleshooting required for filtering/sort in Redux reducers:
     - SerializableStateInvariantMiddleware took 1210ms, which is more than the warning treshold of 32ms.
     - ImmutableStateInvariantMiddleware took 1400ms, which is more than the warning threshold of 32ms. 
