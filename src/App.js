@@ -29,7 +29,7 @@ var CanvasJSStockChart = CanvasJSReact.CanvasJSStockChart;
 
 
 var currentDate = Moment(new Date())
-var yesterday = currentDate.subtract(1,"days").format("YYYY-MM-DD")
+var yesterday = currentDate.subtract(2,"days").format("YYYY-MM-DD")
 
 function App() {
   const [geoJson,setGeoJson] = useState({})
@@ -142,7 +142,7 @@ function App() {
   const handleClick = (country,population) =>{
     console.log("Parent Callback:",country)
     allCountries.map((d)=>{{
-      if(d.name == country){
+      if(d.name.includes(country)){
         setSelectedCountry(country)
       }
     }})
